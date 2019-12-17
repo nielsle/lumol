@@ -34,6 +34,9 @@ impl AllPairs {
         self.initialized = true;
     }
 
+    /// Print statistics regarding neighborlist updates
+    pub fn print_statistics(&self) {}
+
     /// Iterate over nodes that are the starting point of at least one edge
     #[inline]
     pub fn each_i<OP>(&self, op: OP)

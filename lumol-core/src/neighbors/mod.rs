@@ -21,6 +21,9 @@ pub use self::all_pairs::AllPairs;
 mod directed_linked_list;
 pub use self::directed_linked_list::DirectedLinkedList;
 
+mod statistics;
+use self::statistics::Statistics;
+
 /// An enum with structs that implement the Neighbors trait
 /// 
 /// Note: Ideally this this enum should be replaced by a trait object such as Box<Neighbors>, 
@@ -80,6 +83,14 @@ impl Neighbors {
         match self {
             Neighbors::AllPairs(neighbors) => neighbors.update_neighbors(cell, particles),
             Neighbors::Directed(neighbors) => neighbors.update_neighbors(cell, particles),
+        }
+    }
+
+    /// Print statistics regarding neighborlist updates
+    pub fn print_statistics(&self) {
+        match self {
+            Neighbors::AllPairs(neighbors) => neighbors.print_statistics(),
+            Neighbors::Directed(neighbors) => neighbors.print_statistics(),
         }
     }
 

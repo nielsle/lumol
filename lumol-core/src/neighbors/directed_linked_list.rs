@@ -112,6 +112,11 @@ impl DirectedLinkedList {
 
     }
 
+    /// Print statistics regarding neighborlist updates
+    pub fn print_statistics(&self) {
+        println!("{}", self.countdown.statistics())
+    }
+
     /// Iterate over nodes that are the starting point of at least one edge
     #[inline]
     pub fn each_i<OP> (&self, op: OP) where OP: Fn(usize) -> () + Sync + Send { 

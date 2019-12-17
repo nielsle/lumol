@@ -70,6 +70,8 @@ fn run_benchmark (
     println!("Elapsed time (ms)    {:20.0}", now.elapsed().as_millis());
     println!("e_initial            {:20.10}",e_initial);
     println!("e_final              {:20.10}",e_final);
+    system.neighbors().print_statistics();
+
     println!("");
 
     Ok(())
