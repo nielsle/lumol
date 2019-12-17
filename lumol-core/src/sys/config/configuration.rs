@@ -89,6 +89,11 @@ impl Configuration {
         &self.neighbors
     }
 
+    /// Set a new neighbors object and force the neighborlist to update
+    pub fn set_neighbors(&mut self, mut neighbors: Neighbors) {
+        neighbors.update_neighbors(&self.cell, &mut self.particles);
+        self.neighbors = neighbors;
+    }
 }
 
 /// Topology and particles related functions

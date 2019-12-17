@@ -9,6 +9,7 @@
 //! Each of these runs are performed with or without a neighborlist
 use lumol::{Particle, Molecule, System, UnitCell, Vector3D};
 use lumol::energy::{LennardJones, PairInteraction};
+use lumol::neighbors::Neighbors;
 use lumol::units;
 
 use lumol::sim::{MolecularDynamics, Simulation};
@@ -17,7 +18,8 @@ use lumol::sim::{BoltzmannVelocities, InitVelocities};
 use std::time::Instant;
 
 fn run_benchmark (
-    n: usize
+    n: usize,
+    neighbors: Neighbors
 ) -> Result<(), Box<dyn std::error::Error>> {
 
     let lattice_constant = 3.4;
@@ -51,6 +53,8 @@ fn run_benchmark (
     velocities.seed(129);
     velocities.init(&mut system);
 
+    system.set_neighbors(neighbors);
+
     let md = MolecularDynamics::new(units::from(1.0, "fs")?);
     let mut simulation = Simulation::new(Box::new(md));
 
@@ -74,10 +78,22 @@ fn run_benchmark (
 fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Iterate over lattice sizes
-    for &n in &[5, 6, 7, 9, 11, 13, 15] {
+    for &n in &[5, 6, 7, 9, 11] {
 
-        println!("Running a test without a neighborlist, natoms={} ",  n*n*n);
-        run_benchmark(n)?;
+        println!("Running a test with natoms={} using AllPairs",  n*n*n);
+        let neighbors = Neighbors::new_all_pairs();
+        run_benchmark(n, neighbors)?;
+        
+        println!("Running a test with natoms={} using DirectedLinkedList",  n*n*n);
+        let neighbors = Neighbors::new_directed_linkedlist(
+                units::from(8.5, "A")?, 
+                units::from(1.0, "A")?, 
+                0, 
+                2, 
+                None
+        );
+        run_benchmark(n, neighbors)?;
+
     };
 
     Ok(())

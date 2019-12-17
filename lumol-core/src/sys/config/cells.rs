@@ -320,6 +320,13 @@ impl UnitCell {
         return d.norm();
     }
 
+    /// Periodic boundary conditions distance between the point `u` and the point `v`
+    pub fn distance2(&self, u: &Vector3D, v: &Vector3D) -> f64 {
+        let mut d = v - u;
+        self.vector_image(&mut d);
+        return d.norm2();
+    }
+
     /// Get the angle formed by the points at `r1`, `r2` and `r3` using periodic
     /// boundary conditions.
     pub fn angle(&self, r1: &Vector3D, r2: &Vector3D, r3: &Vector3D) -> f64 {

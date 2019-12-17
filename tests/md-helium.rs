@@ -65,6 +65,22 @@ fn constant_energy_leap_frog() {
 }
 
 #[test]
+fn constant_energy_verlet_linkedlist() {
+    START.call_once(::env_logger::init);
+    let path = Path::new(file!()).parent()
+                                 .unwrap()
+                                 .join("data")
+                                 .join("md-helium")
+                                 .join("nve-verlet-linkedlist.toml");
+    let mut config = Input::new(path).unwrap().read().unwrap();
+
+    let e_initial = config.system.total_energy();
+    config.simulation.run(&mut config.system, config.nsteps);
+    let e_final = config.system.total_energy();
+    assert!(f64::abs((e_initial - e_final) / e_final) < 1e-2);
+}
+
+#[test]
 fn perfect_gas() {
     START.call_once(::env_logger::init);
     let path = Path::new(file!()).parent()

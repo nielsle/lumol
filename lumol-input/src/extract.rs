@@ -57,6 +57,28 @@ pub fn uint(key: &str, config: &Table, context: &str) -> Result<u64, Error> {
     }
 }
 
+/// Extract a unsigned integer at the given `key`, from the `config`
+/// TOML table interpreted as a `context`
+pub fn uint_opt(key: &str, config: &Table, context: &str) -> Result<Option<u64>, Error> {
+    let number = match config.get(key) {
+        None => return Ok(None),
+        Some(v) => v
+    };
+
+    match *number {
+        ::toml::Value::Integer(v) => {
+            if v < 0 {
+                Err(Error::from(format!("'{}' must be a positive integer in {}", key, context)))
+            } else {
+                Ok(Some(v as u64))
+            }
+        }
+        _ => Err(Error::from(format!("'{}' must be a positive integer in {}", key, context))),
+    }
+}
+
+
+
 /// Extract an array at the given `key`, from the `config` TOML table
 /// interpreted as a `context`
 pub fn slice<'a>(key: &str, config: &'a Table, context: &str) -> Result<&'a [Value], Error> {

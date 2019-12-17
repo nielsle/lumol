@@ -5,6 +5,7 @@ use toml::value::{Table, Value};
 use lumol_core::{System, UnitCell, TrajectoryBuilder};
 use lumol_sim::{BoltzmannVelocities, InitVelocities};
 use lumol_core::units;
+use lumol_core::neighbors::Neighbors;
 
 use log::warn;
 
@@ -49,6 +50,7 @@ impl Input {
 
         self.read_potentials(&mut system)?;
         self.init_velocities(&mut system)?;
+        self.read_neighbors(&mut system)?;
 
         if !with_cell && system.cell.is_infinite() {
             warn!(
@@ -154,6 +156,58 @@ impl Input {
         } else {
             warn!("No potentials found in input file");
         }
+        Ok(())
+    }
+
+    fn read_neighbors(&self, system: &mut System) -> Result<(), Error> {
+        let config = self.system_table()?;
+
+        if let Some(neighbors) = config.get("neighbors") {
+            if let Some(neighbors) = neighbors.as_table() {
+                let neighbors = match extract::str("type", neighbors, "neighborlist type")? {
+                    "AllPairs" => Neighbors::new_all_pairs() ,
+                    "DirectedLinkedlist" => {
+                        let maximum_cutoff = match system.maximum_cutoff(){
+                            Some(c) => c,
+                            None =>  return Err(Error::from("Cannot use directed_neighbors in a system with without a maximum_cutoff")) 
+                        };
+
+                        let skin = extract::str("skin", neighbors, "neighborlist skin")?;
+                        let skin = units::from_str(skin)?;
+
+                        let delay = extract::uint(
+                            "delay", 
+                            neighbors, 
+                            "Number of steps before first neighborlist check (following an update)"
+                        )?;
+                        
+                        let steps_per_update_check = extract::uint(
+                            "steps_per_update_check", 
+                            neighbors, 
+                            "Number of steps between each neighborlist update check"
+                        )?;
+
+                        let updates_per_sanity_check = extract::uint_opt(
+                            "updates_per_sanity_check", 
+                            neighbors, 
+                            "Number of neighborlist updates between each complete validation of the neighborlist"
+                        )?;
+
+                        Neighbors::new_directed_linkedlist(
+                            maximum_cutoff, 
+                            skin, 
+                            delay, 
+                            steps_per_update_check, 
+                            updates_per_sanity_check
+                        )
+                    },
+                    _ => return Err(Error::from("'type' must be either 'AllPairs' or 'DirectedLinkedlist'"))
+                };
+                system.set_neighbors(neighbors);
+            } else {
+                return Err(Error::from("'neighbors' must be a table in system"));
+            }
+        };
         Ok(())
     }
 }
