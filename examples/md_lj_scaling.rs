@@ -66,11 +66,9 @@ fn run_benchmark (
     println!("Elapsed time (ms)    {:20.0}", now.elapsed().as_millis());
     println!("e_initial            {:20.10}",e_initial);
     println!("e_final              {:20.10}",e_final);
-  
     println!("");
 
     Ok(())
-
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -80,7 +78,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("Running a test without a neighborlist, natoms={} ",  n*n*n);
         run_benchmark(n)?;
-        
     };
 
     Ok(())
