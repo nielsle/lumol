@@ -34,6 +34,7 @@ mod math;
 // Main modules
 pub mod units;
 pub mod consts;
+pub mod neighbors;
 pub mod types;
 pub mod energy;
 pub mod sys;

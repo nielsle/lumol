@@ -33,11 +33,12 @@ impl Compute for Forces {
     fn compute(&self, system: &System) -> Vec<Vector3D> {
         let natoms = system.size();
         let thread_local_forces = ThreadLocalVec::with_size(natoms);
+        let neighbors = system.neighbors(); 
 
-        (0..natoms).into_par_iter().for_each(|i| {
+        neighbors.each_i(|i| {
             let mut forces = thread_local_forces.borrow_mut();
             let mut force_i = Vector3D::zero();
-            for j in (i + 1)..system.size() {
+            neighbors.each_j(i, |j| {
                 let path = system.bond_path(i, j);
                 let d = system.nearest_image(i, j);
                 let dn = d.normalized();
@@ -50,7 +51,7 @@ impl Compute for Forces {
                         forces[j] -= force;
                     }
                 }
-            }
+            });
             forces[i] += force_i;
         });
 

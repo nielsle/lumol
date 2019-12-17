@@ -13,6 +13,8 @@ use crate::{ParticleSlice, ParticleSliceMut, ParticleVec, ParticlePtr, ParticleP
 use crate::{Molecule, MoleculeRef, MoleculeRefMut};
 use crate::BondPath;
 
+use crate::neighbors::Neighbors;
+
 /// The `Permutation` struct contains the old and new particle index in a
 /// `Configuration` after the particles where moved due to a new bond being
 /// added
@@ -44,6 +46,8 @@ pub struct Configuration {
     pub cell: UnitCell,
     /// List of particles in the system
     particles: ParticleVec,
+    /// Neighborlist
+    neighbors: Neighbors,
     /// Bonding information in the system
     bondings: Vec<Bonding>,
     /// Molecules indexes for all the particles
@@ -55,11 +59,36 @@ impl Configuration {
     pub fn new() -> Configuration {
         Configuration {
             particles: ParticleVec::new(),
+            neighbors: Neighbors::new_all_pairs(),
             bondings: Vec::new(),
             molecule_ids: Vec::new(),
             cell: UnitCell::infinite(),
         }
     }
+}
+
+/// Neighborlist related functions
+impl Configuration {
+
+    /// Update the neighborlist if needed
+    /// 
+    /// Warning: If the neighborlist is invalid, then this method returns an error.
+    /// You can avoid the error by changing the value of skin or configuration
+    pub fn update_neighbors(&mut self) {
+        let neighbors =&mut self.neighbors;
+        neighbors.ensure_updated(&self.cell, &mut self.particles);
+    }
+
+    /// Returns a refernece to a NeighborlistKind object that for iterating over pairs of 
+    /// neighboring atoms.
+    ///
+    /// Warning: This method does not guarantee that the neighborlist is actually up to date
+    /// The user needs to call update_neighbors() at regular intervals to keep the neighborlist
+    /// up to date   
+    pub fn neighbors(&self) -> &Neighbors {
+        &self.neighbors
+    }
+
 }
 
 /// Topology and particles related functions

@@ -61,6 +61,8 @@ pub fn get_system(path: &str) -> System {
         }
     }
 
+    system.update_neighbors();
+
     return system;
 }
 

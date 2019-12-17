@@ -64,6 +64,8 @@ impl Propagator for MolecularDynamics {
     }
 
     fn propagate(&mut self, system: &mut System) {
+        system.update_neighbors();
+
         self.integrator.integrate(system);
 
         if let Some(ref mut thermostat) = self.thermostat {

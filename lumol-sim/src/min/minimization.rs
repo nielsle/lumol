@@ -87,6 +87,8 @@ impl Propagator for Minimization {
             return;
         }
 
+        system.update_neighbors();
+
         let result = self.minimizer.minimize(system);
 
         if result.force2 < self.tolerance.force2 {
